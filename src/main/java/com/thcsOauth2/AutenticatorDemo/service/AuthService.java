@@ -3,6 +3,7 @@ package com.thcsOauth2.AutenticatorDemo.service;
 import com.thcsOauth2.AutenticatorDemo.dto.AuthResponse;
 import com.thcsOauth2.AutenticatorDemo.dto.LoginRequest;
 import com.thcsOauth2.AutenticatorDemo.dto.RegisterRequest;
+import com.thcsOauth2.AutenticatorDemo.dto.UpdateRequest;
 import com.thcsOauth2.AutenticatorDemo.model.User;
 import com.thcsOauth2.AutenticatorDemo.repository.UserRepository;
 import com.thcsOauth2.AutenticatorDemo.security.JwtService;
@@ -49,5 +50,33 @@ public class AuthService {
 
         String token = jwtService.generateToken(user.getEmail());
         return new AuthResponse(token, user.getEmail());
+    }
+
+    public User updateUser(String email, UpdateRequest request) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+
+        if (request.getNome() != null) {
+            user.setNome(request.getNome());
+        }
+        if (request.getCognome() != null) {
+            user.setCognome(request.getCognome());
+        }
+        if (request.getPassword() != null) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        return userRepository.save(user);
+    }
+
+    public void deleteUser(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+        userRepository.delete(user);
+    }
+
+    public User getCurrentUser(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
     }
 } 
